@@ -1,6 +1,6 @@
 # EasyFood API
 
-Projeto acadêmico de uma API REST para gerenciamento de restaurantes, desenvolvido em Node.js com Express e Prisma. Esta versão foi adaptada para uso didático e para organização de uma atividade prática, mantendo a proposta original do sistema, mas com ajustes de identificação, documentação e estrutura pessoal.
+Projeto acadêmico de uma API REST para gerenciamento de restaurantes, desenvolvido em Node.js com Express e Prisma.
 
 ## Informações do autor
 
