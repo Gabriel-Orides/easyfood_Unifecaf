@@ -1,0 +1,11 @@
+node_modules/
+.env
+uploads/*
+!uploads/dishes/
+!uploads/users/
+uploads/dishes/*
+uploads/users/*
+!uploads/dishes/.gitkeep
+!uploads/users/.gitkeep
+logs/
+*.log

@@ -1,64 +1,111 @@
-const authService = require('./auth.service');
-const prisma = require('../../database/prisma');
-const { writeLog } = require('../../services/logger.service');
+const authService = require("./auth.service");
 
 async function register(req, res) {
-  const { name, email, password } = req.body;
+  const { name, email, password } = req.body || {};
 
   if (!name || !email || !password) {
-    return res.status(400).json({ error: 'Nome, e-mail e senha são obrigatórios' });
+    return res.status(400).json({
+      error: "Nome, e-mail e senha são obrigatórios"
+    });
   }
 
   try {
-    const user = await authService.register({ name, email, password });
+    const user = await authService.register({
+      name,
+      email,
+      password
+    });
+
     res.status(201).json(user);
   } catch (error) {
-    if (error.code === 'P2002') {
-      return res.status(409).json({ error: 'E-mail já cadastrado' });
+    if (error.code === "P2002") {
+      return res.status(409).json({
+        error: "E-mail já cadastrado"
+      });
     }
 
-    writeLog('error', 'Erro ao registrar usuário', { error: error.message });
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error("Erro ao registrar usuário:", error.message);
+    res.status(500).json({
+      error: "Erro interno do servidor"
+    });
   }
 }
 
 async function login(req, res) {
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'E-mail e senha são obrigatórios' });
+    return res.status(400).json({
+      error: "E-mail e senha são obrigatórios"
+    });
   }
 
   try {
-    const result = await authService.login({ email, password });
+    const result = await authService.login({
+      email,
+      password
+    });
 
     if (!result) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
+      return res.status(401).json({
+        error: "Credenciais inválidas"
+      });
     }
 
-    res.json({ message: 'Login realizado com sucesso', ...result });
+    res.json(result);
   } catch (error) {
-    writeLog('error', 'Erro ao autenticar usuário', { error: error.message });
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error("Erro ao autenticar usuário:", error.message);
+    res.status(500).json({
+      error: "Erro interno do servidor"
+    });
   }
+}
+
+function handleError(res, error, logMessage, publicMessage) {
+  if (!error.statusCode) {
+    console.error(logMessage, error.message);
+  }
+
+  return res.status(error.statusCode || 500).json({
+    error: error.statusCode ? error.message : publicMessage
+  });
 }
 
 async function me(req, res) {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { id: true, name: true, email: true }
+    const user = await authService.getProfile(req.user.id);
+
+    res.json({
+      message: "Você está autenticado!",
+      user
     });
-
-    if (!user) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
-    }
-
-    res.json(user);
   } catch (error) {
-    writeLog('error', 'Erro ao buscar usuário', { error: error.message });
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    handleError(res, error, "Erro ao consultar usuário:", "Erro interno do servidor");
   }
 }
 
-module.exports = { register, login, me };
+async function uploadImage(req, res) {
+  if (!req.file) {
+    return res.status(400).json({
+      error: "Nenhuma imagem enviada"
+    });
+  }
+
+  try {
+    const user = await authService.uploadProfileImage(
+      req.user.id,
+      req.file.buffer
+    );
+
+    res.json(user);
+  } catch (error) {
+    handleError(res, error, "Erro ao processar imagem de perfil:", "Erro ao processar imagem");
+  }
+}
+
+module.exports = {
+  register,
+  login,
+  me,
+  uploadImage
+};

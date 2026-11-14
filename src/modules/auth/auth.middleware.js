@@ -1,25 +1,30 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(' ')[1];
 
-  if (!token) {
-    return res.status(401).json({ error: 'Token obrigatório' });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      error: "Token não fornecido"
+    });
   }
 
-  jwt.verify(
-    token,
-    process.env.JWT_SECRET || 'easyfood-secret-key',
-    (error, user) => {
-      if (error) {
-        return res.status(403).json({ error: 'Token inválido ou expirado' });
-      }
+  const token = authHeader.split(" ")[1];
 
-      req.user = user;
-      next();
-    }
-  );
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.user = {
+      id: payload.sub,
+      email: payload.email
+    };
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      error: "Token inválido ou expirado"
+    });
+  }
 }
 
 module.exports = authenticate;

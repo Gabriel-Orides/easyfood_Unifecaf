@@ -253,8 +253,8 @@
               <input id="restaurantName" type="text" placeholder="Nome do restaurante" required />
             </div>
             <div>
-              <label for="restaurantEmail">E-mail do restaurante</label>
-              <input id="restaurantEmail" type="email" placeholder="restaurante@email.com" required />
+              <label for="restaurantEmail">E-mail do restaurante (opcional)</label>
+              <input id="restaurantEmail" type="email" placeholder="restaurante@email.com" />
             </div>
             <div>
               <label for="restaurantCategory">Categoria</label>
@@ -284,6 +284,10 @@
       const toggleAuthBtn = document.getElementById('toggleAuthBtn');
       const restaurantFormWrap = document.getElementById('restaurantFormWrap');
       const messageBox = document.getElementById('message');
+
+      const escapeHtml = (value) => String(value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
       const showMessage = (text, type) => {
         messageBox.textContent = text;
@@ -328,10 +332,10 @@
             const card = document.createElement('div');
             card.className = 'restaurant-item';
             card.innerHTML = `
-              <h3>${restaurant.name}</h3>
-              <p>${restaurant.category}</p>
-              <p style="color:#6b7280; font-size:0.9rem;">${restaurant.email || 'Sem e-mail'}</p>
-              <div class="badge">⭐ ${restaurant.rating || 0}</div>
+              <h3>${escapeHtml(restaurant.name)}</h3>
+              <p>${escapeHtml(restaurant.category || 'Sem categoria')}</p>
+              <p style="color:#6b7280; font-size:0.9rem;">${escapeHtml(restaurant.email || 'Sem e-mail')}</p>
+              <div class="badge">⭐ ${escapeHtml(restaurant.rating || 0)}</div>
             `;
             list.appendChild(card);
           });
@@ -415,7 +419,7 @@
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ name, email, category, rating })
+            body: JSON.stringify({ name, email: email || undefined, category, rating })
           });
 
           const data = await response.json();
