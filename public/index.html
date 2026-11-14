@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Unifecaf Delivery</title>
+    <title>EasyFood</title>
     <style>
       :root {
         --bg: #f3f7ff;
@@ -46,6 +46,11 @@
         font-weight: 800;
         letter-spacing: -0.04em;
         color: var(--primary);
+        text-decoration: none;
+      }
+
+      .brand span {
+        color: var(--secondary);
       }
 
       .auth-bar {
@@ -186,7 +191,7 @@
   <body>
     <div class="container">
       <header>
-        <div class="brand">Unifecaf</div>
+        <a class="brand" href="/" aria-label="EasyFood">Easy<span>Food</span></a>
         <div class="auth-bar">
           <span id="userName">Visitante</span>
           <button class="btn btn-secondary" id="logoutBtn" style="display:none;">Sair</button>
